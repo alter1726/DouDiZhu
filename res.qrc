@@ -1,0 +1,39 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/1fen-1.png</file>
+        <file>images/1fen-2.png</file>
+        <file>images/1fen-3.png</file>
+        <file>images/2fen-1.png</file>
+        <file>images/2fen-2.png</file>
+        <file>images/2fen-3.png</file>
+        <file>images/3fen-1.png</file>
+        <file>images/3fen-2.png</file>
+        <file>images/3fen-3.png</file>
+        <file>images/background-1.png</file>
+        <file>images/background-2.png</file>
+        <file>images/background-3.png</file>
+        <file>images/background-4.png</file>
+        <file>images/background-5.png</file>
+        <file>images/background-6.png</file>
+        <file>images/background-7.png</file>
+        <file>images/background-8.png</file>
+        <file>images/background-9.png</file>
+        <file>images/background-10.png</file>
+        <file>images/buqiang-1.png</file>
+        <file>images/buqiang-2.png</file>
+        <file>images/buqiang-3.png</file>
+        <file>images/buqiang.png</file>
+        <file>images/card.png</file>
+        <file>images/fen.png</file>
+        <file>images/jiaodizhu.png</file>
+        <file>images/pass.png</file>
+        <file>images/qiangdizhu.png</file>
+        <file>images/score1.png</file>
+        <file>images/score2.png</file>
+        <file>images/score3.png</file>
+        <file>images/start-1.png</file>
+        <file>images/start-2.png</file>
+        <file>images/start-3.png</file>
+        <file>images/card1.png</file>
+    </qresource>
+</RCC>
