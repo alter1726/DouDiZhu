@@ -18,6 +18,20 @@ public:
     //按牌型找牌,并且指定要找的牌是否要大过指定的牌型
     QVector<Cards> findCardType(PlayHand hand, bool beat);
 
+    //制定出牌策略
+    Cards makeStrategy();
+    //第一个出牌
+    Cards firstPlay();
+    //得到比指定牌型大的牌
+    Cards getGreaterCards(PlayHand type);
+    //能大过指定的牌时，判断是出牌还是过
+    bool whetherToBeat(Cards &cs);
+
+    //从指定的Cards对象中挑选出满足条件的顺子
+    void pickSeqSingles(QVector<QVector<Cards>> &allSeqRecord, const QVector<Cards> &seqSingle, const Cards& cards);
+    //最优的顺子的集合的筛选函数
+    QVector<Cards> pickOptimalSeqSingles();
+
 protected:
     using function = Cards (Strategy::*)(Card::CardPoint point);
     struct CardInfo
