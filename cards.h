@@ -44,6 +44,7 @@ public:
     int cardCount();
     //是否为空
     bool isEmpty();
+    bool isEmpty() const;
     //清空
     void clear();
 

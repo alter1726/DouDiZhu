@@ -54,9 +54,13 @@ public:
     void onPlayerStatusChanged(Player *player, GameControl::PlayerStatus status);
     //处理玩家抢地主
     void onGrabLordBet(Player *player, int bet, bool flag);
+    //处理玩家的出牌
+    void onDisposePlayHand(Player* player, const Cards& cards);
 
     //显示特效动画
     void showAnimation(AnimationType type, int bet = 0);
+    //隐藏玩家打出的牌
+    void hidePlayerDropCards(Player* player);
 
 protected:
     void paintEvent(QPaintEvent *ev);

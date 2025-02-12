@@ -5,6 +5,7 @@
 #include <QTimer>
 
 #include "./ui_gamepanel.h"
+#include "playhand.h"
 
 GamePanel::GamePanel(QWidget *parent) : QMainWindow(parent), ui(new Ui::GamePanel)
 {
@@ -57,6 +58,7 @@ void GamePanel::gameControlInit()
     connect(m_gameCtl, &GameControl::playerStatusChanged, this, &GamePanel::onPlayerStatusChanged);
     connect(m_gameCtl, &GameControl::notifyGrabLordBet, this, &GamePanel::onGrabLordBet);
     connect(m_gameCtl, &GameControl::gameStatusChanged, this, &GamePanel::gameStatusProcess);
+    connect(m_gameCtl, &GameControl::notifyPlayHand, this, &GamePanel::onDisposePlayHand);
 }
 
 void GamePanel::updatePlayerScore()
@@ -363,6 +365,31 @@ void GamePanel::updatePlayerCards(Player *player)
             panel->move(leftX, topY + i * cardSpace);
         }
     }
+    //显示玩家打出的牌,得到当前玩家的出牌区域以及本轮打出的牌
+    QRect playCardRect = m_contextMap[player].playHandRect;
+    Cards lastCards = m_contextMap[player].lastCards;
+    if (!lastCards.isEmpty()) {
+        int playSpacing = 24;
+        CardList lastCardList = lastCards.toCardList();
+        CardList::ConstIterator itplayed = lastCardList.constBegin();
+        for (int i = 0; itplayed != lastCardList.constEnd(); itplayed++, i++) {
+            CardPanel *panel = m_cardMap[*itplayed];
+            panel->setFrontSide(true);
+            panel->raise();
+            //将打出的牌移动到出牌区域
+            if (m_contextMap[player].align == Horizontal) {
+                int leftBase = playCardRect.left() +
+                               (playCardRect.width() - (lastCardList.size() - 1) * playSpacing - panel->width()) / 2;
+                int top = playCardRect.top() + (playCardRect.height() - panel->height()) / 2;
+                panel->move(leftBase + i * playSpacing, top);
+            } else {
+                int left = playCardRect.left() + (playCardRect.width() - panel->width()) / 2;
+                int top = playCardRect.top();
+                panel->move(left, top + i * playSpacing);
+            }
+            panel->show();
+        }
+    }
 }
 
 void GamePanel::onPlayerStatusChanged(Player *player, GameControl::PlayerStatus status)
@@ -397,13 +424,43 @@ void GamePanel::onGrabLordBet(Player *player, int bet, bool flag)
     }
     context.info->show();
     //显示叫地主分数
-    showAnimation(Bet,bet);
+    showAnimation(Bet, bet);
+}
+
+void GamePanel::onDisposePlayHand(Player *player, const Cards &cards)
+{
+    //存储玩家打出的牌
+    auto it = m_contextMap.find(player);
+    it->lastCards = cards;
+    //根据牌型播放游戏特效
+    Cards &myCards = const_cast<Cards &>(cards);
+    PlayHand hand(myCards);
+    PlayHand::HandType type = hand.getHandType();
+    if (type == PlayHand::Hand_Plane || type == PlayHand::Hand_Plane_Two_Pair ||
+        type == PlayHand::Hand_Plane_Two_Single) {
+        showAnimation(Plane);
+    } else if (type == PlayHand::Hand_Seq_Pair) {
+        showAnimation(LianDui);
+    } else if (type == PlayHand::Hand_Seq_Single) {
+        showAnimation(ShunZi);
+    } else if (type == PlayHand::Hand_Bomb) {
+        showAnimation(Bomb);
+    } else if (type == PlayHand::Hand_Bomb_Jokers) {
+        showAnimation(JokerBomb);
+    }
+    //如果玩家打出的是空牌(不出牌),显示提示信息
+    if (cards.isEmpty()) {
+        it->info->setPixmap(QPixmap(":/images/pass.png"));
+        it->info->show();
+    }
+    //更新玩家剩余的牌
+    updatePlayerCards(player);
+    //播放提示音乐,判断玩家剩余的牌的数量
 }
 
 void GamePanel::showAnimation(AnimationType type, int bet)
 {
-    switch(type)
-    {
+    switch (type) {
     case AnimationType::LianDui:
         break;
     case AnimationType::ShunZi:
@@ -416,11 +473,28 @@ void GamePanel::showAnimation(AnimationType type, int bet)
         break;
     case AnimationType::Bet:
         m_animation->setFixedSize(160, 100);
-        m_animation->move((width()-m_animation->width())/2, (height()-m_animation->height())/2-140);
+        m_animation->move((width() - m_animation->width()) / 2, (height() - m_animation->height()) / 2 - 140);
         m_animation->showBetScore(bet);
         break;
     }
     m_animation->show();
+}
+
+void GamePanel::hidePlayerDropCards(Player *player)
+{
+    auto it = m_contextMap.find(player);
+    if (it != m_contextMap.end()) {
+        if (it->lastCards.isEmpty()) {
+            it->info->hide();
+        } else {
+            //转换Cards为Card
+            CardList list = it->lastCards.toCardList();
+            for (auto last = list.begin(); last != list.end(); last++) {
+                m_cardMap[*last]->hide();
+            }
+        }
+        it->lastCards.clear();
+    }
 }
 
 void GamePanel::paintEvent(QPaintEvent *ev)

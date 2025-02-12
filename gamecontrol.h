@@ -69,6 +69,10 @@ signals:
     void notifyGrabLordBet(Player *player, int bet, bool flag);
     //游戏状态变化
     void gameStatusChanged(GameStatus status);
+    //通知玩家出牌了
+    void notifyPlayHand(Player *player, const Cards &card);
+    //给玩家传递出牌数据
+    void pendingInfo(Player *player, const Cards &card);
 
 private:
     struct BetRecord
