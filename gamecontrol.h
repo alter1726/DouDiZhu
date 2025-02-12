@@ -60,6 +60,8 @@ public:
 
     //处理叫地主
     void onGrabBet(Player *player, int bet);
+    //处理出牌
+    void onPlayHand(Player *player, const Cards &card);
 
 signals:
     void playerStatusChanged(Player *player, PlayerStatus status);

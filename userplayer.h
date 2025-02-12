@@ -13,6 +13,8 @@ public:
 
     void readyCallLord() override;
     void readyPlayHand() override;
+    void thinkCallLord() override;
+    void thinkPlayHand() override;
 };
 
 #endif // USERPLAYER_H

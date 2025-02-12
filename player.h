@@ -88,11 +88,15 @@ public:
     void storePendingInfo(Player *player, const Cards &cards);
 
     virtual void readyCallLord() = 0;
-    virtual void readyPlayHand();
+    virtual void readyPlayHand() = 0;
+    virtual void thinkCallLord() = 0;
+    virtual void thinkPlayHand() = 0;
 
 signals:
     //通知已经叫地主下注
     void notifyGrabLordBet(Player *player, int bet);
+    //通知已经出牌
+    void notifyPlayHand(Player *player, const Cards &card);
 
 protected:
     QString m_name;

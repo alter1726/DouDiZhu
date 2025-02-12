@@ -129,6 +129,7 @@ void Player::clearCards()
 void Player::playHand(const Cards &cards)
 {
     m_cards.remove(cards);
+    emit notifyPlayHand(this, cards);
 }
 
 Player *Player::getPendPlayer()
@@ -145,8 +146,4 @@ void Player::storePendingInfo(Player *player, const Cards &cards)
 {
     m_pendPlayer = player;
     m_pendCards = cards;
-}
-
-void Player::readyPlayHand()
-{
 }

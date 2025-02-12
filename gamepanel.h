@@ -4,6 +4,7 @@
 #include <QLabel>
 #include <QMainWindow>
 
+#include "animationwindow.h"
 #include "cardpanel.h"
 #include "gamecontrol.h"
 
@@ -18,6 +19,7 @@ class GamePanel : public QMainWindow
     Q_OBJECT
 
 public:
+    enum AnimationType{ShunZi, LianDui, Plane, JokerBomb, Bomb, Bet};
     GamePanel(QWidget *parent = nullptr);
     ~GamePanel();
 
@@ -52,6 +54,9 @@ public:
     void onPlayerStatusChanged(Player *player, GameControl::PlayerStatus status);
     //处理玩家抢地主
     void onGrabLordBet(Player *player, int bet, bool flag);
+
+    //显示特效动画
+    void showAnimation(AnimationType type, int bet = 0);
 
 protected:
     void paintEvent(QPaintEvent *ev);
@@ -96,5 +101,7 @@ private:
     QTimer *m_timer;
     QRect m_cardsRect;
     QHash<CardPanel *, QRect> m_userCards;
+
+    AnimationWindow* m_animation;
 };
 #endif // GAMEPANEL_H

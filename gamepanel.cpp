@@ -33,6 +33,8 @@ GamePanel::GamePanel(QWidget *parent) : QMainWindow(parent), ui(new Ui::GamePane
     //定时器实例化
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, &GamePanel::onDispatchCard);
+
+    m_animation = new AnimationWindow(this);
 }
 
 GamePanel::~GamePanel()
@@ -394,6 +396,31 @@ void GamePanel::onGrabLordBet(Player *player, int bet, bool flag)
         }
     }
     context.info->show();
+    //显示叫地主分数
+    showAnimation(Bet,bet);
+}
+
+void GamePanel::showAnimation(AnimationType type, int bet)
+{
+    switch(type)
+    {
+    case AnimationType::LianDui:
+        break;
+    case AnimationType::ShunZi:
+        break;
+    case AnimationType::Plane:
+        break;
+    case AnimationType::Bomb:
+        break;
+    case AnimationType::JokerBomb:
+        break;
+    case AnimationType::Bet:
+        m_animation->setFixedSize(160, 100);
+        m_animation->move((width()-m_animation->width())/2, (height()-m_animation->height())/2-140);
+        m_animation->showBetScore(bet);
+        break;
+    }
+    m_animation->show();
 }
 
 void GamePanel::paintEvent(QPaintEvent *ev)
