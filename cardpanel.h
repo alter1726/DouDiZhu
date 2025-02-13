@@ -39,6 +39,7 @@ protected:
     void paintEvent(QPaintEvent *event);
     void mousePressEvent(QMouseEvent *event);
 signals:
+    void cardSelected(Qt::MouseButton button);
 
 private:
     QPixmap m_front;

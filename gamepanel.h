@@ -19,7 +19,15 @@ class GamePanel : public QMainWindow
     Q_OBJECT
 
 public:
-    enum AnimationType{ShunZi, LianDui, Plane, JokerBomb, Bomb, Bet};
+    enum AnimationType
+    {
+        ShunZi,
+        LianDui,
+        Plane,
+        JokerBomb,
+        Bomb,
+        Bet
+    };
     GamePanel(QWidget *parent = nullptr);
     ~GamePanel();
 
@@ -55,15 +63,18 @@ public:
     //处理玩家抢地主
     void onGrabLordBet(Player *player, int bet, bool flag);
     //处理玩家的出牌
-    void onDisposePlayHand(Player* player, const Cards& cards);
+    void onDisposePlayHand(Player *player, const Cards &cards);
+    //处理玩家选牌
+    void onCardSelected(Qt::MouseButton button);
 
     //显示特效动画
     void showAnimation(AnimationType type, int bet = 0);
     //隐藏玩家打出的牌
-    void hidePlayerDropCards(Player* player);
+    void hidePlayerDropCards(Player *player);
 
 protected:
     void paintEvent(QPaintEvent *ev);
+    void mouseMoveEvent(QMouseEvent *ev);
 
 private:
     enum CardAlign
@@ -106,6 +117,8 @@ private:
     QRect m_cardsRect;
     QHash<CardPanel *, QRect> m_userCards;
 
-    AnimationWindow* m_animation;
+    AnimationWindow *m_animation;
+    CardPanel *m_curSelCard;
+    QSet<CardPanel *> m_selectCards;
 };
 #endif // GAMEPANEL_H

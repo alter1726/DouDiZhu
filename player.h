@@ -97,6 +97,8 @@ signals:
     void notifyGrabLordBet(Player *player, int bet);
     //通知已经出牌
     void notifyPlayHand(Player *player, const Cards &card);
+    //通知已经发牌了
+    void notifyPickCards(Player* player, const Cards& cards);
 
 protected:
     QString m_name;
