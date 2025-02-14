@@ -41,6 +41,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         robotplayhand.h robotplayhand.cpp
         endingpanel.h endingpanel.cpp
         countdown.h countdown.cpp
+        bgmcontrol.h bgmcontrol.cpp
 
     )
 # Define target properties for Android with Qt 6 as:
