@@ -11,12 +11,15 @@ void UserPlayer::readyCallLord()
 
 void UserPlayer::readyPlayHand()
 {
+    emit startCountDown();
 }
 
 void UserPlayer::thinkCallLord()
 {
+
 }
 
 void UserPlayer::thinkPlayHand()
 {
+
 }

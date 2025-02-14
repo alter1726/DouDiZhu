@@ -2,10 +2,12 @@
 
 #include <QMouseEvent>
 #include <QPainter>
+#include <QPropertyAnimation>
 #include <QRandomGenerator>
 #include <QTimer>
 
 #include "./ui_gamepanel.h"
+#include "endingpanel.h"
 #include "player.h"
 #include "playhand.h"
 
@@ -19,7 +21,7 @@ GamePanel::GamePanel(QWidget *parent) : QMainWindow(parent), ui(new Ui::GamePane
     m_bgImage.load(path);
     //窗口标题、大小
     this->setWindowTitle("欢乐斗地主");
-    this->setFixedSize(1000, 600);
+    this->setFixedSize(1000, 650);
     //实例化游戏控制类
     gameControlInit();
     //初始化玩家得分
@@ -32,11 +34,14 @@ GamePanel::GamePanel(QWidget *parent) : QMainWindow(parent), ui(new Ui::GamePane
     initPlayerContext();
     //游戏场景初始化
     initGameScene();
+    //倒计时
+    initCountDown();
 
     //定时器实例化
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, &GamePanel::onDispatchCard);
 
+    showEndingScorePanel();
     m_animation = new AnimationWindow(this);
 }
 
@@ -478,6 +483,14 @@ void GamePanel::onPlayerStatusChanged(Player *player, GameControl::PlayerStatus 
         }
         break;
     case GameControl::Winning:
+        m_contextMap[m_gameCtl->getLeftRobot()].isFrontSide = true;
+        m_contextMap[m_gameCtl->getRightRobot()].isFrontSide = true;
+        updatePlayerCards(m_gameCtl->getLeftRobot());
+        updatePlayerCards(m_gameCtl->getRightRobot());
+        //更新玩家的得分
+        updatePlayerScore();
+        m_gameCtl->setCurrentPlayer(player);
+        showEndingScorePanel();
         break;
     default:
         break;
@@ -597,6 +610,7 @@ void GamePanel::onUserPlayHand()
             return;
         }
     }
+    m_countDown->stopCountDown();
     //通过玩家对象出牌
     m_gameCtl->getUserPlayer()->playHand(cs);
     // 清空容器
@@ -605,6 +619,7 @@ void GamePanel::onUserPlayHand()
 
 void GamePanel::onUserPass()
 {
+    m_countDown->stopCountDown();
     //判断是不是用户玩家
     Player *curPlayer = m_gameCtl->getCurrentPlayer();
     Player *userPlayer = m_gameCtl->getUserPlayer();
@@ -665,6 +680,54 @@ void GamePanel::hidePlayerDropCards(Player *player)
         }
         it->lastCards.clear();
     }
+}
+
+void GamePanel::showEndingScorePanel()
+{
+    bool islord = m_gameCtl->getUserPlayer()->getRole() == Player::Lord ? true : false;
+    bool win = m_gameCtl->getUserPlayer()->win();
+    EndingPanel *panel = new EndingPanel(islord, win, this);
+    panel->show();
+    panel->move((width() - panel->width()) / 2, -panel->height());
+    panel->setPlayerScore(m_gameCtl->getLeftRobot()->getScore(), m_gameCtl->getRightRobot()->getScore(),
+                          m_gameCtl->getUserPlayer()->getScore());
+
+    QPropertyAnimation *animation = new QPropertyAnimation(panel, "geometry", this);
+    //动画持续的时间
+    animation->setDuration(1500);
+    //设置窗口的起始位置和终止位置
+    animation->setStartValue(QRect(panel->x(), panel->y(), panel->width(), panel->height()));
+    animation->setEndValue(
+        QRect((width() - panel->width()) / 2, (height() - panel->height()) / 2, panel->width(), panel->height()));
+    //设置窗口的运动曲线
+    animation->setEasingCurve(QEasingCurve(QEasingCurve::OutBounce));
+    //播放动画效果
+    animation->start();
+
+    //处理窗口信号
+    connect(panel, &EndingPanel::continueGame, this, [=]() {
+        panel->close();
+        panel->deleteLater();
+        animation->deleteLater();
+        ui->btnGroup->selectPanel(ButtonGroup::Empty);
+        gameStatusProcess(GameControl::DispatchCard);
+    });
+}
+
+void GamePanel::initCountDown()
+{
+    m_countDown = new CountDown(this);
+    m_countDown->move((width() - m_countDown->width()) / 2, (height() - m_countDown->height()) / 2 + 30);
+    connect(m_countDown, &CountDown::notMuchTime, this, [=]() {
+        //播放音乐
+    });
+    connect(m_countDown, &CountDown::timeout, this, &GamePanel::onUserPass);
+    UserPlayer *userPlayer = m_gameCtl->getUserPlayer();
+    connect(userPlayer, &UserPlayer::startCountDown, this, [=]() {
+        if (m_gameCtl->getPendPlayer() != userPlayer && m_gameCtl->getPendPlayer() != nullptr) {
+            m_countDown->showCountDown();
+        }
+    });
 }
 
 void GamePanel::paintEvent(QPaintEvent *ev)
