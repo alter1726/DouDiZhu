@@ -47,6 +47,8 @@ public:
     void initGameScene();
     //处理游戏的状态
     void gameStatusProcess(GameControl::GameStatus status);
+    //加载玩家头像
+    QPixmap loadRoleImage(Player::Sex sex, Player::Direction direct, Player::Role role);
 
     //发牌
     void startDispatchCard();
@@ -66,6 +68,10 @@ public:
     void onDisposePlayHand(Player *player, const Cards &cards);
     //处理玩家选牌
     void onCardSelected(Qt::MouseButton button);
+    //处理用户玩家出牌
+    void onUserPlayHand();
+    //用户玩家放弃出牌
+    void onUserPass();
 
     //显示特效动画
     void showAnimation(AnimationType type, int bet = 0);

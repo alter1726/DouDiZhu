@@ -35,5 +35,24 @@
         <file>images/start-2.png</file>
         <file>images/start-3.png</file>
         <file>images/card1.png</file>
+        <file>images/chupai_btn-1.png</file>
+        <file>images/chupai_btn-2.png</file>
+        <file>images/chupai_btn-3.png</file>
+        <file>images/farmer_fail.png</file>
+        <file>images/farmer_man_1.png</file>
+        <file>images/farmer_man_2.png</file>
+        <file>images/farmer_win.png</file>
+        <file>images/farmer_woman_1.png</file>
+        <file>images/farmer_woman_2.png</file>
+        <file>images/farmer-right.png</file>
+        <file>images/lord_man_1.png</file>
+        <file>images/lord_man_2.png</file>
+        <file>images/lord_woman_1.png</file>
+        <file>images/lord_woman_2.png</file>
+        <file>images/lord-right.png</file>
+        <file>images/pass_btn-1.png</file>
+        <file>images/pass_btn-2.png</file>
+        <file>images/pass_btn-3.png</file>
+        <file>images/gameover.png</file>
     </qresource>
 </RCC>

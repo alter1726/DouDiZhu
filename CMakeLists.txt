@@ -39,6 +39,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         robotgraplord.h robotgraplord.cpp
         animationwindow.h animationwindow.cpp
         robotplayhand.h robotplayhand.cpp
+        endingpanel.h endingpanel.cpp
 
     )
 # Define target properties for Android with Qt 6 as:

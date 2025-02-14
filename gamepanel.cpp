@@ -125,8 +125,8 @@ void GamePanel::initButtonsGroup()
         //发牌状态
         gameStatusProcess(GameControl::DispatchCard);
     });
-    connect(ui->btnGroup, &ButtonGroup::playHand, this, [=]() {});
-    connect(ui->btnGroup, &ButtonGroup::pass, this, [=]() {});
+    connect(ui->btnGroup, &ButtonGroup::playHand, this, &GamePanel::onUserPlayHand);
+    connect(ui->btnGroup, &ButtonGroup::pass, this, &GamePanel::onUserPass);
     connect(ui->btnGroup, &ButtonGroup::betPoint, this, [=](int bet) {
         m_gameCtl->getUserPlayer()->grabLordBet(bet);
         ui->btnGroup->selectPanel(ButtonGroup::Empty);
@@ -240,9 +240,52 @@ void GamePanel::gameStatusProcess(GameControl::GameStatus status)
             PlayerContext &context = m_contextMap[m_playerList.at(i)];
             //隐藏各个玩家抢地主过程中的提示信息
             context.info->hide();
+            //显示各个玩家的头像
+            Player *player = m_playerList.at(i);
+            QPixmap pixmap = loadRoleImage(player->getSex(), player->getDirection(), player->getRole());
+            context.roleImg->setPixmap(pixmap);
+            context.roleImg->show();
         }
         break;
     }
+}
+
+QPixmap GamePanel::loadRoleImage(Player::Sex sex, Player::Direction direct, Player::Role role)
+{
+    //找图片
+    QVector<QString> lordMan;
+    QVector<QString> lordWoman;
+    QVector<QString> farmerMan;
+    QVector<QString> farmerWoman;
+    lordMan << ":/images/lord_man_1.png"
+            << ":/images/lord_man_2.png";
+    lordWoman << ":/images/lord_woman_1.png"
+              << ":/images/lord_woman_2.png";
+    farmerMan << ":/images/farmer_man_1.png"
+              << ":/images/farmer_man_2.png";
+    farmerWoman << ":/images/farmer_woman_1.png"
+                << ":/images/farmer_woman_2.png";
+
+    //加载图片
+    QImage image;
+    int random = QRandomGenerator::global()->bounded(2);
+    if (sex == Player::Man && role == Player::Lord) {
+        image.load(lordMan.at(random));
+    } else if (sex == Player::Man && role == Player::Farmer) {
+        image.load(farmerMan.at(random));
+    } else if (sex == Player::Woman && role == Player::Lord) {
+        image.load(lordWoman.at(random));
+    } else if (sex == Player::Woman && role == Player::Farmer) {
+        image.load(farmerWoman.at(random));
+    }
+
+    QPixmap pixmap;
+    if (direct == Player::Left) {
+        pixmap = QPixmap::fromImage(image);
+    } else {
+        pixmap = QPixmap::fromImage(image.mirrored(true, false));
+    }
+    return pixmap;
 }
 
 void GamePanel::startDispatchCard()
@@ -286,7 +329,7 @@ void GamePanel::onDispatchCard()
         Card card = m_gameCtl->takeOneCard();
         curPlayer->storeDispatchCard(card);
         Cards cs(card);
-        disposeCard(curPlayer, cs);
+        // disposeCard(curPlayer, cs);
         //切换玩家
         m_gameCtl->setCurrentPlayer(curPlayer->getNextPlayer());
         curMovePos = 0;
@@ -516,7 +559,73 @@ void GamePanel::onCardSelected(Qt::MouseButton button)
         } else {
             m_selectCards.erase(it);
         }
+    } else if (button == Qt::RightButton) {
+        //调用出牌按钮的槽函数
+        onUserPlayHand();
     }
+}
+
+void GamePanel::onUserPlayHand()
+{
+    //判断游戏状态
+    if (m_gameStatus != GameControl::PlayingHand) {
+        return;
+    }
+    //判断玩家是不是用户玩家
+    if (m_gameCtl->getCurrentPlayer() != m_gameCtl->getUserPlayer()) {
+        return;
+    }
+    //判断要出的牌是否为空
+    if (m_selectCards.isEmpty()) {
+        return;
+    }
+    //得到要打出的牌的牌型
+    Cards cs;
+    for (auto it = m_selectCards.begin(); it != m_selectCards.end(); it++) {
+        Card card = (*it)->getCard();
+        cs.add(card);
+    }
+    PlayHand hand(cs);
+    PlayHand::HandType type = hand.getHandType();
+    if (type == PlayHand::Hand_Unknown) {
+        return;
+    }
+    //判断当前玩家的牌能不能压住上一家的牌
+    if (m_gameCtl->getPendPlayer() != m_gameCtl->getUserPlayer()) {
+        Cards cards = m_gameCtl->getPendCards();
+        if (!hand.canBeat(PlayHand(cards))) {
+            return;
+        }
+    }
+    //通过玩家对象出牌
+    m_gameCtl->getUserPlayer()->playHand(cs);
+    // 清空容器
+    m_selectCards.clear();
+}
+
+void GamePanel::onUserPass()
+{
+    //判断是不是用户玩家
+    Player *curPlayer = m_gameCtl->getCurrentPlayer();
+    Player *userPlayer = m_gameCtl->getUserPlayer();
+    if (curPlayer != userPlayer) {
+        return;
+    }
+    //判断当前用户玩家是不是上一次出牌的玩家(可以不处理)
+    Player *pendPlayer = m_gameCtl->getPendPlayer();
+    if (pendPlayer == userPlayer || pendPlayer == nullptr) {
+        return;
+    }
+    //打出一个空的Cards对象
+    Cards empty;
+    userPlayer->playHand(empty);
+    //清空用户选择的牌(玩家可能选择了一些牌, 但是没有打出去)
+    for (auto it = m_selectCards.begin(); it != m_selectCards.end(); it++) {
+        (*it)->setSelected(false);
+    }
+    m_selectCards.clear();
+    //更新玩家待出牌区域的牌
+    updatePlayerCards(userPlayer);
 }
 
 void GamePanel::showAnimation(AnimationType type, int bet)
