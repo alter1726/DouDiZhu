@@ -43,6 +43,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         countdown.h countdown.cpp
         bgmcontrol.h bgmcontrol.cpp
         bgmcontrol.h bgmcontrol.cpp
+        loading.h loading.cpp
 
     )
 # Define target properties for Android with Qt 6 as:
