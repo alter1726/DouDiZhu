@@ -5,6 +5,7 @@
 #include <QMainWindow>
 
 #include "animationwindow.h"
+#include "bgmcontrol.h"
 #include "cardpanel.h"
 #include "countdown.h"
 #include "gamecontrol.h"
@@ -132,5 +133,6 @@ private:
     CardPanel *m_curSelCard;
     QSet<CardPanel *> m_selectCards;
     CountDown *m_countDown;
+    BGMControl *m_bgm;
 };
 #endif // GAMEPANEL_H
