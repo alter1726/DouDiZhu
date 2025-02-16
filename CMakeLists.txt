@@ -14,37 +14,34 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Multimedia Widgets)
 
 set(PROJECT_SOURCES
         main.cpp
-        gamepanel.cpp
-        gamepanel.h
-        gamepanel.ui
 )
+
+#添加头文件目录,写到添加子目录指令的上面
+include_directories(
+    ${PROJECT_SOURCE_DIR}/card
+    ${PROJECT_SOURCE_DIR}/windows
+    ${PROJECT_SOURCE_DIR}/control
+    ${PROJECT_SOURCE_DIR}/player
+    ${PROJECT_SOURCE_DIR}/strategy
+    ${PROJECT_SOURCE_DIR}/thread
+)
+
+#添加子目录
+add_subdirectory(card)
+add_subdirectory(windows)
+add_subdirectory(control)
+add_subdirectory(player)
+add_subdirectory(strategy)
+add_subdirectory(thread)
+
+#添加资源文件
+qt_add_resources(RES res.qrc)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(LandLord
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        card.h card.cpp
-        cardpanel.h cardpanel.cpp
-        player.h player.cpp
-        cards.h cards.cpp
-        robot.h robot.cpp
-        userplayer.h userplayer.cpp
-        gamecontrol.h gamecontrol.cpp
-        scorepanel.h scorepanel.cpp scorepanel.ui
-        mybutton.h mybutton.cpp
-        buttongroup.h buttongroup.cpp buttongroup.ui
-        res.qrc
-        playhand.h playhand.cpp
-        strategy.h strategy.cpp
-        robotgraplord.h robotgraplord.cpp
-        animationwindow.h animationwindow.cpp
-        robotplayhand.h robotplayhand.cpp
-        endingpanel.h endingpanel.cpp
-        countdown.h countdown.cpp
-        bgmcontrol.h bgmcontrol.cpp
-        bgmcontrol.h bgmcontrol.cpp
-        loading.h loading.cpp
-
+        ${RES}
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET LandLord APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -60,11 +57,13 @@ else()
     else()
         add_executable(LandLord
             ${PROJECT_SOURCES}
+            ${RES}
         )
     endif()
 endif()
 
-target_link_libraries(LandLord PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Multimedia)
+target_link_libraries(LandLord PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Multimedia
+  card windows control player strategy thread)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
