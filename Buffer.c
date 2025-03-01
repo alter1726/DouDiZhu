@@ -1,10 +1,12 @@
-
 #define _GNU_SOURCE
 #include "Buffer.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/uio.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/socket.h>
+
 
 struct Buffer *bufferInit(int size)
 {
@@ -123,4 +125,27 @@ int bufferSocketRead(struct Buffer *buffer, int fd)
     }
     free(tmpbuf);
     return result;
+}
+
+char *bufferFindCRLF(struct Buffer *buffer)
+{
+    char *ptr = memmem(buffer->data + buffer->readPos, bufferReadableSize(buffer), "\r\n", 2);
+    return ptr;
+}
+
+int bufferSendData(struct Buffer *buffer, int socket)
+{
+    // 判断有无数据
+    int readable = bufferReadableSize(buffer);
+    if (readable > 0)
+    {
+        int count = send(socket, buffer->data + buffer->readPos, readable, MSG_NOSIGNAL);
+        if (count > 0)
+        {
+            buffer->readPos += count;
+            usleep(1);
+        }
+        return count;
+    }
+    return 0;
 }

@@ -1,5 +1,7 @@
 #include "ChannelMap.h"
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 struct ChannelMap *channelMapInit(int size)
 {

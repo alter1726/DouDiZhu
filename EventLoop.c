@@ -1,4 +1,10 @@
 #include "EventLoop.h"
+#include <assert.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 struct EventLoop *eventLoopInit()
 {
@@ -34,6 +40,17 @@ struct EventLoop *eventLoopInitEx(const char *threadName)
     evLoop->head = evLoop->tail = NULL;
     // map
     evLoop->channelMap = channelMapInit(128);
+    int ret = socketpair(AF_UNIX, SOCK_STREAM, 0, evLoop->socketPair);
+    if (ret == -1)
+    {
+        perror("socketpair");
+        exit(0);
+    }
+    // 指定规则: evLoop->socketPair[0] 发送数据, evLoop->socketPair[1] 接收数据
+    struct Channel *channel = channelInit(evLoop->socketPair[1], ReadEvent,
+                                          readLocalMessage, NULL, NULL, evLoop);
+    // channel 添加到任务队列
+    eventLoopAddTask(evLoop, channel, ADD);
     return evLoop;
 }
 
